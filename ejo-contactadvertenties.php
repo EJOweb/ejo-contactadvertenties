@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name:         CountrySideDating Contactadvertenties
+ * Plugin Name:         EJO Contactadvertenties
  * Plugin URI:          http://github.com/ejoweb/ejo-contactadvertenties
- * Description:         CountrySideDating Contactadvertenties
- * Version:             0.1
+ * Description:         EJO Contactadvertenties
+ * Version:             0.2
  * Author:              Erik Joling
- * Author URI:          http://www.ejoweb.nl/
- * Text Domain:         ejo-contactadvertenties
+ * Author URI:          https://www.ejoweb.nl/
+ * Text Domain:         ejo-contactads
  * Domain Path:         /languages
  *
  * GitHub Plugin URI:   https://github.com/EJOweb/ejo-contactadvertenties
@@ -26,13 +26,10 @@
 require_once( plugin_dir_path( __FILE__ ) . 'class-settings.php' );
 require_once( plugin_dir_path( __FILE__ ) . 'class-widget.php' );
 
-/* Contactadvertenties */
-EJO_Contactadvertenties::init();
-
 /**
  *
  */
-final class EJO_Contactadvertenties 
+final class EJO_Contactads 
 {
 	/* Holds the instance of this class. */
 	private static $_instance = null;
@@ -53,9 +50,7 @@ final class EJO_Contactadvertenties
 	/* Post type category */
 	public static $post_type_category = 'contactadvertentie_category';
 
-	/**
-	 * Class is initiated at 'after_setup_theme' hook inside ejo-contactadvertenties.php
-	 */
+	/* Plugin setup. */
 	protected function __construct() 
 	{
 		/* Register Post Type */
@@ -65,7 +60,7 @@ final class EJO_Contactadvertenties
 		add_action( 'widgets_init', array( $this, 'register_widget' ) );
 
 		/* Settings */
-		EJO_Contactadvertenties_Settings::init();
+		EJO_Contactads_Settings::init();
 
 		/* Rewrite contactadvertentie post permalink */
 		// add_filter( 'post_type_link', array( $this, 'contactadvertentie_permalink' ), 10, 4 );
@@ -75,7 +70,15 @@ final class EJO_Contactadvertenties
 
 		/* Manage columns */
 		add_action( 'manage_'.self::$post_type.'_posts_custom_column', array( $this, 'manage_contactadvertentie_columns' ), 10, 2 );
+
+		/* Add activation hook */
+        register_activation_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_activation') );
+
+        /* Add uninstall hook */
+        register_uninstall_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_uninstall') );
+        register_deactivation_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_uninstall') );
 	}
+
 
 	/* Register Post Type */
 	public function register_post_type() 
@@ -91,9 +94,6 @@ final class EJO_Contactadvertenties
 
 		/* Archive slug */
 		$archive_slug = (isset($contactadvertentie_settings['archive-slug'])) ? $contactadvertentie_settings['archive-slug'] : self::$post_type_archive;
-
-		/* Category archive slug */
-		$category_archive_slug = 'contactadvertentie-categorie';
 
 		/* Register the Contactadvertenties post type. */
 		register_post_type(
@@ -111,6 +111,35 @@ final class EJO_Contactadvertenties
 					'with_front' => false,
 				),
 
+				'map_meta_cap' => true,
+
+				'capability_type' => 'contactad',
+				'capabilities' => array(
+
+					//* meta caps (don't assign these to roles)
+					'edit_post'              => 'edit_contactad',
+					'read_post'              => 'read_contactad',
+					'delete_post'            => 'delete_contactad',
+
+					//* primitive/meta caps
+					'create_posts'           => 'create_contactads',
+
+					//* primitive caps used outside of map_meta_cap()
+					'edit_posts'             => 'edit_contactads',
+					'edit_others_posts'      => 'edit_others_contactads',
+					'publish_posts'          => 'publish_contactads',
+					'read_private_posts'     => 'read_private_contactads',
+
+					//* primitive caps used inside of map_meta_cap()
+					'read'                   => 'read',
+					'delete_posts'           => 'delete_contactads',
+					'delete_private_posts'   => 'delete_private_contactads',
+					'delete_published_posts' => 'delete_published_contactads',
+					'delete_others_posts'    => 'delete_others_contactads',
+					'edit_private_posts'     => 'edit_private_contactads',
+					'edit_published_posts'   => 'edit_published_contactads'
+				),
+
 				/* What features the post type supports. */
 				'supports' => array(
 					'title',
@@ -123,19 +152,19 @@ final class EJO_Contactadvertenties
 
 				/* Labels used when displaying the posts. */
 				'labels' => array(
-					'name'               => $title,
-					'singular_name'      => __( 'Advertentie',                   'ejo-contactadvertenties' ),
-					'menu_name'          => __( 'Advertenties',              	'ejo-contactadvertenties' ),
-					'name_admin_bar'     => __( 'Advertenties',	 			    'ejo-contactadvertenties' ),
-					'add_new'            => __( 'Add New',                    			'ejo-contactadvertenties' ),
-					'add_new_item'       => __( 'Add New Advertentie',           'ejo-contactadvertenties' ),
-					'edit_item'          => __( 'Edit Advertentie',              'ejo-contactadvertenties' ),
-					'new_item'           => __( 'New Advertentie',               'ejo-contactadvertenties' ),
-					'view_item'          => __( 'View Advertentie',              'ejo-contactadvertenties' ),
-					'search_items'       => __( 'Search Advertenties',           'ejo-contactadvertenties' ),
-					'not_found'          => __( 'No contactadvertenties found',         'ejo-contactadvertenties' ),
-					'not_found_in_trash' => __( 'No contactadvertenties found in trash','ejo-contactadvertenties' ),
-					'all_items'          => __( 'All Advertenties',              'ejo-contactadvertenties' ),
+					'name'               => __( $title,					'ejo-contactads' ),
+					'singular_name'      => __( 'Advertentie', 			'ejo-contactads' ),
+					'menu_name'          => __( 'Advertenties', 		'ejo-contactads' ),
+					'name_admin_bar'     => __( 'Advertenties',			'ejo-contactads' ),
+					'add_new'            => __( 'Add New', 				'ejo-contactads' ),
+					'add_new_item'       => __( 'Add New Advertentie', 	'ejo-contactads' ),
+					'edit_item'          => __( 'Edit Advertentie', 	'ejo-contactads' ),
+					'new_item'           => __( 'New Advertentie', 		'ejo-contactads' ),
+					'view_item'          => __( 'View Advertentie', 	'ejo-contactads' ),
+					'search_items'       => __( 'Search Advertenties', 	'ejo-contactads' ),
+					'not_found'          => __( 'No contactadvertenties found', 			'ejo-contactads' ),
+					'not_found_in_trash' => __( 'No contactadvertenties found in trash',	'ejo-contactads' ),
+					'all_items'          => __( 'All Advertenties', 	'ejo-contactads' ),
 				)
 			)
 		);
@@ -153,21 +182,28 @@ final class EJO_Contactadvertenties
 					'with_front' => false,
 				),
 
+				'capabilities' => array(
+					'manage_terms' 	=> 'manage_contactad_categories',
+					'edit_terms' 	=> 'edit_contactad_categories',
+					'delete_terms' 	=> 'delete_contactad_categories',
+					'assign_terms' 	=> 'assign_contactad_categories',
+				),
+
 				/* Labels used when displaying the posts. */
 				'labels'        => array(
-					'name'              => __( 'Categories',				'ejo-contactadvertenties' ),
-					'singular_name'     => __( 'Category', 				 	'ejo-contactadvertenties' ),
-					'menu_name'         => __( 'Categories', 			 	'ejo-contactadvertenties' ),
-					'search_items'      => __( 'Search Categories',      	'ejo-contactadvertenties' ),
-					'all_items'         => __( 'All Categories',         	'ejo-contactadvertenties' ),
-					'parent_item'       => __( 'Parent Category',        	'ejo-contactadvertenties' ),
-					'parent_item_colon' => __( 'Parent Category:',       	'ejo-contactadvertenties' ),
-					'edit_item'         => __( 'Edit Category',          	'ejo-contactadvertenties' ),
-					'update_item'       => __( 'Update Category',        	'ejo-contactadvertenties' ),
-					'add_new_item'      => __( 'Add New Category',       	'ejo-contactadvertenties' ),
-					'new_item_name'     => __( 'New Category ',          	'ejo-contactadvertenties' ),
-					'popular_items'     => __( 'Popular Categories',     	'ejo-contactadvertenties' ),
-					'not_found'			=> __( 'Category not found', 	 	'ejo-contactadvertenties' )
+					'name'              => __( 'Categories',				'ejo-contactads' ),
+					'singular_name'     => __( 'Category', 				 	'ejo-contactads' ),
+					'menu_name'         => __( 'Categories', 			 	'ejo-contactads' ),
+					'search_items'      => __( 'Search Categories',      	'ejo-contactads' ),
+					'all_items'         => __( 'All Categories',         	'ejo-contactads' ),
+					'parent_item'       => __( 'Parent Category',        	'ejo-contactads' ),
+					'parent_item_colon' => __( 'Parent Category:',       	'ejo-contactads' ),
+					'edit_item'         => __( 'Edit Category',          	'ejo-contactads' ),
+					'update_item'       => __( 'Update Category',        	'ejo-contactads' ),
+					'add_new_item'      => __( 'Add New Category',       	'ejo-contactads' ),
+					'new_item_name'     => __( 'New Category ',          	'ejo-contactads' ),
+					'popular_items'     => __( 'Popular Categories',     	'ejo-contactads' ),
+					'not_found'			=> __( 'Category not found', 	 	'ejo-contactads' )
 				),
 			)
 		);
@@ -276,10 +312,87 @@ final class EJO_Contactadvertenties
 		}
 	}
 
+	/* Get contacts capabilities (EJO Contactads plugin) */
+    public static function get_caps() 
+    {
+        /* Custom Contactad capabilities */
+        return array(
+        	// Post type caps.
+			'create_contactads',
+			'edit_contactads',
+			'edit_others_contactads',
+			'publish_contactads',
+			'read_private_contactads',
+			'delete_contactads',
+			'delete_private_contactads',
+			'delete_published_contactads',
+			'delete_others_contactads',
+			'edit_private_contactads',
+			'edit_published_contactads',
+
+            // Taxonomy caps.
+            'manage_contactad_categories',
+            'edit_contactad_categories',
+            'delete_contactad_categories',
+            'assign_contactad_categories',
+        );
+    }
+
+
+	/* Fire when activating this plugin */
+    public static function on_plugin_activation()
+    {
+		// Get the administrator and editor role.
+		$roles = array( get_role( 'administrator' ), get_role( 'editor' ) );
+
+		//* Get Caps for contactads
+		$contactad_caps = EJO_Contactads::get_caps();
+
+		//* Add caps for all given roles
+		foreach ($roles as $role) {
+
+			// If the role exists, add required capabilities for the plugin.
+			if ( ! is_null( $role ) ) {
+
+				foreach ($contactad_caps as $contactads_cap) {
+
+					// Add cap to role.
+					$role->add_cap( $contactads_cap );
+				}
+			}
+		}
+    }
+
+    /* Fire when uninstalling this plugin */
+    public static function on_plugin_uninstall()
+    {
+    	// Get the administrator and editor role.
+		$roles = array( get_role( 'administrator' ), get_role( 'editor' ) );
+
+		//* Get Caps for contactads
+		$contactad_caps = EJO_Contactads::get_caps();
+
+		//* Add caps for all given roles
+		foreach ($roles as $role) {
+
+			// If the role exists, add required capabilities for the plugin.
+			if ( ! is_null( $role ) ) {
+
+				foreach ($contactad_caps as $contactads_cap) {
+
+					// Add cap to role.
+					$role->remove_cap( $contactads_cap );
+				}
+			}
+		}
+    }
+
 	/* Register Widget */
 	public function register_widget() 
 	{ 
-	    register_widget( 'EJO_Contactadvertenties_Widget' ); 
+	    register_widget( 'EJO_Contactads_Widget' ); 
 	}
 }
 
+/* Contactadvertenties */
+EJO_Contactads::init();

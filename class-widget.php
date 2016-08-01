@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class used to implement a Contactadvertenties widget.
+ * Class used to implement a Contactads widget.
  */
-final class EJO_Contactadvertenties_Widget extends WP_Widget
+final class EJO_Contactads_Widget extends WP_Widget
 {
 	/**
 	 * Sets up a new widget instance.
@@ -39,7 +39,7 @@ final class EJO_Contactadvertenties_Widget extends WP_Widget
 		$text = apply_filters( 'widget_text', $text, $instance, $this );
 
 		/* Get archive of contactadvertenties */
-		$url = get_post_type_archive_link( EJO_Contactadvertenties::$post_type );
+		$url = get_post_type_archive_link( EJO_Contactads::$post_type );
 		?>
 
 		<?php echo $args['before_widget']; ?>

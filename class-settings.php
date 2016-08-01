@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Class Contactadvertenties settings.
+ * Class Contactads settings.
  */
-class EJO_Contactadvertenties_Settings 
+class EJO_Contactads_Settings 
 {
 	/* Holds the instance of this class. */
 	private static $_instance = null;
@@ -40,7 +40,7 @@ class EJO_Contactadvertenties_Settings
 	public function add_contactadvertenties_setting_menu()
 	{
 		add_submenu_page( 
-			"edit.php?post_type=".EJO_Contactadvertenties::$post_type, 
+			"edit.php?post_type=".EJO_Contactads::$post_type, 
 			'Contactadvertenties Instellingen', 
 			'Instellingen', 
 			'edit_theme_options', 
@@ -110,7 +110,7 @@ class EJO_Contactadvertenties_Settings
     public function show_contactadvertenties_settings() 
     {	
     	/* Get post type object */
-    	$contactadvertenties_project_post_type = get_post_type_object( EJO_Contactadvertenties::$post_type );
+    	$contactadvertenties_project_post_type = get_post_type_object( EJO_Contactads::$post_type );
 
     	/* Load settings */
     	$contactadvertenties_settings = get_option('contactadvertenties_settings', array());
