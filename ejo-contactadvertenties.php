@@ -63,7 +63,7 @@ final class EJO_Contactads
 		EJO_Contactads_Settings::init();
 
 		/* Rewrite contactadvertentie post permalink */
-		// add_filter( 'post_type_link', array( $this, 'contactadvertentie_permalink' ), 10, 4 );
+		add_filter( 'post_type_link', array( $this, 'contactadvertentie_permalink' ), 10, 4 );
 
 		/* Manage columns */
 		add_filter( 'manage_edit-'.self::$post_type.'_columns', array( $this, 'edit_contactadvertentie_columns' ) );
@@ -75,8 +75,8 @@ final class EJO_Contactads
         register_activation_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_activation') );
 
         /* Add uninstall hook */
-        register_uninstall_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_uninstall') );
-        register_deactivation_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_uninstall') );
+        // register_uninstall_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_uninstall') );
+        register_deactivation_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_deactivation') );
 	}
 
 
@@ -107,8 +107,11 @@ final class EJO_Contactads
 
 				/* The rewrite handles the URL structure. */
 				'rewrite' => array(
-					'slug'       => $archive_slug,
+					'slug'       => trailingslashit( $archive_slug ) . '%' . self::$post_type_category . '%',
 					'with_front' => false,
+					'pages'      => true,
+					'feeds'      => true,
+					'ep_mask'    => EP_PERMALINK,
 				),
 
 				'map_meta_cap' => true,
@@ -219,11 +222,11 @@ final class EJO_Contactads
 		 * $archive-slug/([^/]+)/([^/]+)/page/?([0-9]{1,})/?$	
 		 * index.php?contactadvertentie_category=$matches[1]&contactadvertentie_post=$matches[2]&paged=$matches[3]
 		 */
-		// add_rewrite_rule( 
-		// 	"$archive_slug/(.+?)/page/?([0-9]{1,})/?$", 
-	 //    	'index.php?contactadvertentie_category=$matches[1]&paged=$matches[2]',  
-	 //    	'top'  
-		// );
+		add_rewrite_rule( 
+			"$archive_slug/(.+?)/page/?([0-9]{1,})/?$", 
+	    	'index.php?'.self::$post_type_category.'=$matches[1]&paged=$matches[2]',  
+	    	'top'  
+		);
 	}
 
 	/**
@@ -342,6 +345,9 @@ final class EJO_Contactads
 	/* Fire when activating this plugin */
     public static function on_plugin_activation()
     {
+    	//* Flush rules to process permalinks of custom post type
+    	flush_rewrite_rules();
+
 		// Get the administrator and editor role.
 		$roles = array( get_role( 'administrator' ), get_role( 'editor' ) );
 
@@ -363,9 +369,12 @@ final class EJO_Contactads
 		}
     }
 
-    /* Fire when uninstalling this plugin */
-    public static function on_plugin_uninstall()
+    /* Fire when deactivating this plugin */
+    public static function on_plugin_deactivation()
     {
+    	//* Flush rules to process permalinks of custom post type
+    	flush_rewrite_rules();
+
     	// Get the administrator and editor role.
 		$roles = array( get_role( 'administrator' ), get_role( 'editor' ) );
 
@@ -396,3 +405,4 @@ final class EJO_Contactads
 
 /* Contactadvertenties */
 EJO_Contactads::init();
+
