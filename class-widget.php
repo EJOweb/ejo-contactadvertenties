@@ -1,5 +1,7 @@
 <?php
 
+
+
 /**
  * Class used to implement a Contactads widget.
  */
@@ -20,6 +22,7 @@ final class EJO_Contactads_Widget extends WP_Widget
 		parent::__construct( 'contactadvertenties-widget', $widget_title, $widget_info );
 	}
 
+
 	/**
 	 * Outputs the content for the current widget instance.
 	 */
@@ -30,67 +33,57 @@ final class EJO_Contactads_Widget extends WP_Widget
 		 * Then extract variables of this array
 		 */
         extract( wp_parse_args( $instance, array( 
-            'title' => '',
-            'text' => '',
+            'post_id' => '',
             'link_text' => '',
         )));
 
-		/* Run $text through filter */
-		$text = apply_filters( 'widget_text', $text, $instance, $this );
+        if (empty($post_id))
+        	return;
 
-		/* Get archive of contactadvertenties */
-		$url = get_post_type_archive_link( EJO_Contactads::$post_type );
+        $post = get_post($post_id);
+
+		if (empty($post))
+        	return;
+
+		$url = get_permalink( $post->ID );
+
+		$content = apply_filters('the_content', $post->post_content);
+		$content = str_replace(']]>', ']]&gt;', $content);
+
+		$image_id = get_post_thumbnail_id( $post_id );
+		$image_url = ( ! empty($image_id) ) ? wp_get_attachment_image_src($image_id, 'thumbnail')[0] : '';
+
+		$categories = wp_get_post_terms( $post_id, EJO_Contactads::$post_type_category );
+		$category = ( ! empty($categories) ) ? $categories[0] : '';
+		
 		?>
 
 		<?php echo $args['before_widget']; ?>
 
-		<?php echo $args['before_title']; ?><a href="<?php echo $url; ?>"><?php echo $title; ?></a><?php echo $args['after_title']; ?>
+		<?php if ( ! empty($image_url) ) : ?>
 
-		<div class="textwidget">
-			<?php echo wpautop($text); ?>
+			<div class="featured-image">
+				<img src="<?php echo $image_url; ?>">
+			</div>
+
+		<?php endif; ?>
+
+		<div class="entry-header">
+
+			<?php if ( ! empty($category) ) : ?>
+				<a href="<?php echo get_term_link( $category->term_id ); ?>" class="category"><?php echo $category->name; ?></a>
+			<?php endif; ?>
+
+			<h3><?php echo $post->post_title; ?></h3>
 		</div>
 
-		<?php
-
-		/* Get contactadvertenties categories */
-		$categories = get_terms( 
-			'contactadvertenties_category',
-			array(
-			    'orderby' => 'name',
-			    'order'   => 'ASC',
-			)
-		);
-
-		?>
-	    
-	    <div class="contactadvertenties-categories">
-
-		    <?php foreach( $categories as $category ) : // Loop through each contactadvertenties category ?>
-
-		    	<?php
-
-				/* Get Contactadvertenties ategory url */
-				$category_url = esc_url( get_term_link( $category ) );
-
-				/* Fabricate contactadvertenties category link */
-			    $category_link = sprintf( '<a href="%s" alt="%s">%s</a>',
-			        $category_url,
-			        esc_attr( sprintf( 'View all posts in %s', $category->name ) ),
-			        esc_html( $category->name )
-			    );
-
-				?>
-
-		    	<h4 <?php hybrid_attr( 'category-title' ); ?>><a href="<?php echo esc_url( get_category_link( $category->term_id ) ); ?>" title="<?php echo esc_attr( 'Bekijk alle '. $category->name .' artikelen' ); ?>" rel="bookmark" itemprop="url"><?php echo $category->name; ?></a></h4>
-
-
-			<?php endforeach; // END foreach category loop ?>
-
+		<div class="entry-content">
+			<?php echo $content; ?>
 		</div>
 
 		<?php if (!empty($link_text)) : ?>
 
-			<a href="<?php echo $url; ?>" class="read-more"><?php echo $link_text; ?></a>
+			<a href="<?php echo $url; ?>" class="button"><?php echo $link_text; ?></a>
 
 		<?php endif; // URL check ?>
 	
@@ -109,21 +102,31 @@ final class EJO_Contactads_Widget extends WP_Widget
 		 * Then extract variables of this array
 		 */
         extract( wp_parse_args( $instance, array( 
-            'title' => '',
-            'text' => '',
+            'post_id' => '',
             'link_text' => '',
         )));
 
+         //* Get posts
+	    $posts = get_posts( array(
+			'post_type' => EJO_Contactads::$post_type,
+			'posts_per_page' => -1,
+		));
+
 		?>
-		<p>
-			<label for="<?php echo $this->get_field_id('title'); ?>"><?php _e('Title:') ?></label>
-			<input type="text" class="widefat" id="<?php echo $this->get_field_id('title'); ?>" name="<?php echo $this->get_field_name('title'); ?>" value="<?php echo $title; ?>" />
-		</p>
 
 		<p>
-			<label for="<?php echo $this->get_field_id('text'); ?>"><?php _e('Text:') ?></label>
-			<textarea class="widefat" id="<?php echo $this->get_field_id('text'); ?>" name="<?php echo $this->get_field_name('text'); ?>"><?php echo $text; ?></textarea>
-			<?php //wp_editor( $text, $this->get_field_id('text'), array(	'textarea_name' => $this->get_field_name('text') ) ); ?>
+			<label for="<?php echo $this->get_field_id('post_id'); ?>"><?php _e('Contactadvertentie:') ?></label>
+			<select id="<?php echo $this->get_field_id('post_id'); ?>" name="<?php echo $this->get_field_name('post_id'); ?>" class="widefat">
+
+				<?php 			
+
+				foreach ($posts as $post) {
+					echo '<option value="'.$post->ID.'" '.selected($post_id, $post->ID, false).'>'.$post->post_title.'</option>';
+				}
+
+				?>
+
+			</select>
 		</p>
 
 		<p>
@@ -141,17 +144,11 @@ final class EJO_Contactads_Widget extends WP_Widget
 		/* Store old instance as defaults */
 		$instance = $old_instance;
 
-		/* Store new title */
-		$instance['title'] = strip_tags( $new_instance['title'] );
-
-		/* Store text */
-		if ( current_user_can('unfiltered_html') )
-			$instance['text'] =  $new_instance['text'];
-		else
-			$instance['text'] = wp_kses_post( stripslashes( $new_instance['text'] ) );
+		/* Store post id */
+		$instance['post_id'] = $new_instance['post_id'];
 
 		/* Store url and link-text */
-		$instance['link-text'] = strip_tags( $new_instance['link-text'] );
+		$instance['link_text'] = strip_tags( $new_instance['link_text'] );
 
 		/* Return updated instance */
 		return $instance;
