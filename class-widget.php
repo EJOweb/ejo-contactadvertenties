@@ -51,7 +51,8 @@ final class EJO_Contactads_Widget extends WP_Widget
 		$content = str_replace(']]>', ']]&gt;', $content);
 
 		$image_id = get_post_thumbnail_id( $post_id );
-		$image_url = ( ! empty($image_id) ) ? wp_get_attachment_image_src($image_id, 'thumbnail')[0] : '';
+		$image_size = apply_filters( 'ejo_contactads_widget_image_size', 'thumbnail' );
+		$image_url = ( ! empty($image_id) ) ? wp_get_attachment_image_src($image_id, $image_size)[0] : '';
 
 		$categories = wp_get_post_terms( $post_id, EJO_Contactads::$post_type_category );
 		$category = ( ! empty($categories) ) ? $categories[0] : '';
