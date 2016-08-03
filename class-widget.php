@@ -47,8 +47,10 @@ final class EJO_Contactads_Widget extends WP_Widget
 
 		$url = get_permalink( $post->ID );
 
-		$content = apply_filters('the_content', $post->post_content);
-		$content = str_replace(']]>', ']]&gt;', $content);
+		// $content = apply_filters('the_content', $post->post_content);
+		// $content = str_replace(']]>', ']]&gt;', $content);
+
+		$content = ejo_get_post_summary( $post->ID );
 
 		$image_id = get_post_thumbnail_id( $post_id );
 		$image_size = apply_filters( 'ejo_contactads_widget_image_size', 'thumbnail' );
@@ -75,7 +77,7 @@ final class EJO_Contactads_Widget extends WP_Widget
 				<a href="<?php echo get_term_link( $category->term_id ); ?>" class="category"><?php echo $category->name; ?></a>
 			<?php endif; ?>
 
-			<h3><?php echo $post->post_title; ?></h3>
+			<h3 class="entry-title"><a href="<?php echo $url; ?>"><?php echo $post->post_title; ?></a></h3>
 		</div>
 
 		<div class="entry-content">
