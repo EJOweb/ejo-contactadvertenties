@@ -1,3 +1,6 @@
+- Fixed inconsistency bug in settings
+- Code restructuring
+
 0.3.1
 - Fixed post-summary for widget
 - Made link of heading in widget

@@ -22,11 +22,11 @@ class EJO_Contactads_Settings
 		add_action( 'admin_menu', array( $this, 'add_contactadvertenties_setting_menu' ) );
 
 		/* Register Settings for Settings Page */
-		add_action( 'admin_init', array( $this, 'initialize_contactadvertenties_settings' ) );
+		add_action( 'admin_init', array( $this, 'initialize_contactadvertentie_settings' ) );
 
 		/* Save settings (before init, because post type registers on init) */
 		/* I probably should be using Settings API.. */
-		add_action( 'init', array( $this, 'save_contactadvertenties_settings' ), 1 );
+		add_action( 'init', array( $this, 'save_contactadvertentie_settings' ), 1 );
 
 		/* Add scripts to settings page */
 		add_action( 'admin_enqueue_scripts', array( $this, 'add_scripts_and_styles' ) ); 
@@ -44,39 +44,39 @@ class EJO_Contactads_Settings
 			'Contactadvertenties Instellingen', 
 			'Instellingen', 
 			'edit_theme_options', 
-			'contactadvertenties-settings', 
-			array( $this, 'contactadvertenties_settings_page' ) 
+			'contactadvertentie-settings', 
+			array( $this, 'contactadvertentie_settings_page' ) 
 		);
 	}
 
 	/* Register settings */
-	public function initialize_contactadvertenties_settings() 
+	public function initialize_contactadvertentie_settings() 
 	{
 		// Add option if not already available
-		if( false == get_option( 'contactadvertenties_settings' ) ) {  
-			add_option( 'contactadvertenties_settings' );
+		if( false == get_option( 'contactadvertentie_settings' ) ) {  
+			add_option( 'contactadvertentie_settings' );
 		} 
 	}
 
 	/* Save Contactadvertenties settings */
-	public function save_contactadvertenties_settings()
+	public function save_contactadvertentie_settings()
 	{
-		if (isset($_POST['submit']) && !empty($_POST['contactadvertenties-settings']) ) :
+		if (isset($_POST['submit']) && !empty($_POST['contactadvertentie-settings']) ) :
 
 			/* Escape slug */
-			$_POST['contactadvertenties-settings']['archive-slug'] = sanitize_title( $_POST['contactadvertenties-settings']['archive-slug'] );
+			$_POST['contactadvertentie-settings']['archive_slug'] = sanitize_title( $_POST['contactadvertentie-settings']['archive_slug'] );
 
 			/* Strip slashes */
-			$_POST['contactadvertenties-settings']['description'] = stripslashes( $_POST['contactadvertenties-settings']['description'] );
+			$_POST['contactadvertentie-settings']['description'] = stripslashes( $_POST['contactadvertentie-settings']['description'] );
 
 			/* Update settings */
-			update_option( "contactadvertenties_settings", $_POST['contactadvertenties-settings'] ); 
+			update_option( "contactadvertentie_settings", $_POST['contactadvertentie-settings'] ); 
 
 		endif;
 	}
 
 	/* */
-	public function contactadvertenties_settings_page()
+	public function contactadvertentie_settings_page()
 	{
 	?>
 		<div class='wrap' style="max-width:960px;">
@@ -84,7 +84,7 @@ class EJO_Contactads_Settings
 
 			<?php 
 			/* Let user know the settings are saved */
-			if (isset($_POST['submit']) && !empty($_POST['contactadvertenties-settings']) ) {
+			if (isset($_POST['submit']) && !empty($_POST['contactadvertentie-settings']) ) {
 
 				flush_rewrite_rules(); /* Flush rewrite rules because archive slug could have changed */
 
@@ -93,9 +93,9 @@ class EJO_Contactads_Settings
 			?>
 
 			<form action="<?php echo esc_attr( wp_unslash( $_SERVER['REQUEST_URI'] ) ); ?>" method="post">
-				<?php wp_nonce_field('contactadvertenties-settings', 'contactadvertenties-settings-nonce'); ?>
+				<?php wp_nonce_field('contactadvertentie-settings', 'contactadvertentie-settings-nonce'); ?>
 
-				<?php self::show_contactadvertenties_settings(); ?>
+				<?php self::show_contactadvertentie_settings(); ?>
 
 				<?php submit_button( 'Wijzigingen opslaan' ); ?>
 				<?php // submit_button( 'Standaard Instellingen', 'secondary', 'reset' ); ?>
@@ -107,22 +107,23 @@ class EJO_Contactads_Settings
 	}
 
 
-    public function show_contactadvertenties_settings() 
+    public function show_contactadvertentie_settings() 
     {	
     	/* Get post type object */
-    	$contactadvertenties_project_post_type = get_post_type_object( EJO_Contactads::$post_type );
+    	$contactadvertentie_project_post_type = get_post_type_object( EJO_Contactads::$post_type );
 
     	/* Load settings */
-    	$contactadvertenties_settings = get_option('contactadvertenties_settings', array());
+    	extract(
+    		wp_parse_args( get_option('contactadvertentie_settings', array()), array( 
+	            'title' => '',
+	            'description' => '',
+	            'archive_slug' => '',
+	        ))
+	    );
 
-		/* Archive title */
-		$title = (isset($contactadvertenties_settings['title'])) ? $contactadvertenties_settings['title'] : $contactadvertenties_project_post_type->labels->name;
-
-		/* Archive description */
-		$description = (isset($contactadvertenties_settings['description'])) ? $contactadvertenties_settings['description'] : $contactadvertenties_project_post_type->description;
-
-		/* Archive slug */
-		$archive_slug = (isset($contactadvertenties_settings['archive-slug'])) ? $contactadvertenties_settings['archive-slug'] : $contactadvertenties_project_post_type->has_archive;
+    	//* Fallback for $title and $archive_slug when they are empty
+	    $title = $title ? $title : $contactadvertentie_project_post_type->labels->name;
+	    $archive_slug = $archive_slug ? $archive_slug : $contactadvertentie_project_post_type->has_archive;
 		
     	?>
     	<table class="form-table">
@@ -133,13 +134,13 @@ class EJO_Contactads_Settings
 						<label for="contactadvertenties-title"><?php _e('Title:'); ?></label>
 					</th>
 					<td>
-						<input
-							id="contactadvertenties-title"
-							value="<?php echo $title; ?>"
-							type="text"
-							name="contactadvertenties-settings[title]"
-							class="text"
-						>
+						<?php 
+						printf( '<input id="%s" value="%s" type="text" name="%s" class="text">',
+							'contactadvertenties-title',
+							$title,
+							'contactadvertentie-settings[title]'
+						);
+						?>
 						<p class="description">Wordt getoond op de archiefpagina, breadcrumbs en meta's tenzij anders aangegeven</p>
 					</td>
 				</tr>
@@ -155,7 +156,7 @@ class EJO_Contactads_Settings
 							$description, 
 							'contactadvertenties_description', 
 							array(
-								'textarea_name' => 'contactadvertenties-settings[description]',
+								'textarea_name' => 'contactadvertentie-settings[description]',
 							) 
 						);
 
@@ -169,13 +170,13 @@ class EJO_Contactads_Settings
 						<label for="contactadvertenties-slug"><?php _e('Archive Slug'); ?></label>
 					</th>
 					<td>
-						<input
-							id="contactadvertenties-slug"
-							value="<?php echo $archive_slug; ?>"
-							type="text"
-							name="contactadvertenties-settings[archive-slug]"
-							class="text"
-						>
+						<?php 
+						printf( '<input id="%s" value="%s" type="text" name="%s" class="text">',
+							'contactadvertenties-slug',
+							$archive_slug,
+							'contactadvertentie-settings[archive_slug]'
+						);
+						?>
 						<p class="description">Bepaalt de <i>slug</i> van de archiefpagina</p>
 					</td>
 				</tr>
@@ -189,13 +190,13 @@ class EJO_Contactads_Settings
 	public function add_scripts_and_styles()
 	{
 		/* Settings Page */
-		if (isset($_GET['page']) && $_GET['page'] == 'contactadvertenties-settings') :
+		if (isset($_GET['page']) && $_GET['page'] == 'contactadvertentie-settings') :
 
 			/* Settings page javascript */
-			wp_enqueue_script( 'contactadvertenties-admin-settings-page-js', plugin_dir_url( __FILE__ ) . 'assets/js/admin-settings-page.js', array('jquery'));
+			wp_enqueue_script( 'contactadvertenties-admin-settings-page-js', EJO_Contactads_Plugin::$uri . 'assets/js/admin-settings-page.js', array('jquery'));
 
 			/* Settings page stylesheet */
-			wp_enqueue_style( 'contactadvertenties-admin-settings-page-css', plugin_dir_url( __FILE__ ) . 'assets/css/admin-settings-page.css' );
+			wp_enqueue_style( 'contactadvertenties-admin-settings-page-css', EJO_Contactads_Plugin::$uri . 'assets/css/admin-settings-page.css' );
 
 		endif;
 	}
