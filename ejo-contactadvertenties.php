@@ -3,7 +3,7 @@
  * Plugin Name:         EJO Contactadvertenties
  * Plugin URI:          http://github.com/ejoweb/ejo-contactadvertenties
  * Description:         EJO Contactadvertenties
- * Version:             0.3.1
+ * Version:             0.4
  * Author:              Erik Joling
  * Author URI:          https://www.ejoweb.nl/
  * Text Domain:         ejo-contactads
@@ -24,7 +24,7 @@ final class EJO_Contactads_Plugin
     const SLUG = 'ejo-contactadvertenties';
 
     //* Version number of this plugin
-    const VERSION = '0.3.1';
+    const VERSION = '0.4';
 
 	//* Stores the directory path for this plugin.
     public static $dir;

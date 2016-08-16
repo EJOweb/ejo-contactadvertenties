@@ -1,3 +1,4 @@
+0.4
 - Fixed inconsistency bug in settings
 - Code restructuring
 
