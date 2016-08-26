@@ -286,7 +286,7 @@ final class EJO_Contactads
         return array(
         	// Post type caps.
 			'create_contactads',
-			'edit_contactads',
+			'edit_contactads', // Main cap (reference for submenu_page)
 			'edit_others_contactads',
 			'publish_contactads',
 			'read_private_contactads',

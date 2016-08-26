@@ -43,7 +43,7 @@ class EJO_Contactads_Settings
 			"edit.php?post_type=".EJO_Contactads::$post_type, 
 			'Contactadvertenties Instellingen', 
 			'Instellingen', 
-			'edit_theme_options', 
+			'edit_contactads', 
 			'contactadvertentie-settings', 
 			array( $this, 'contactadvertentie_settings_page' ) 
 		);

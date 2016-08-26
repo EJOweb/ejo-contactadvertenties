@@ -1,3 +1,5 @@
+- Linked menu_page to own capability
+
 0.4
 - Fixed inconsistency bug in settings
 - Code restructuring
