@@ -56,11 +56,11 @@ final class EJO_Contactads_Plugin
 		add_action( 'widgets_init', array( $this, 'register_widget' ) );
 
 		/* Add activation hook */
-        register_activation_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_activation') );
+        register_activation_hook( __FILE__, array( 'EJO_Contactads_Plugin', 'on_plugin_activation') );
 
         /* Add uninstall hook */
-        // register_uninstall_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_uninstall') );
-        register_deactivation_hook( __FILE__, array( 'EJO_Contactads', 'on_plugin_deactivation') );
+        // register_uninstall_hook( __FILE__, array( 'EJO_Contactads_Plugin', 'on_plugin_uninstall') );
+        register_deactivation_hook( __FILE__, array( 'EJO_Contactads_Plugin', 'on_plugin_deactivation') );
 	}
 
 	//* Defines the directory path and URI for the plugin.
@@ -78,7 +78,7 @@ final class EJO_Contactads_Plugin
 		require_once( self::$dir . 'includes/class-settings.php' );
 		require_once( self::$dir . 'includes/class-widget.php' );
 
-		/* Settings */
+		/* Contactads Class */
 		EJO_Contactads::init();
 
 		/* Settings */
