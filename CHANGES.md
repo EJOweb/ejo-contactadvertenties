@@ -1,3 +1,4 @@
+0.4.2
 - Removed EJO_Base dependancy
 - Fixed flush_rewrite bug
 
