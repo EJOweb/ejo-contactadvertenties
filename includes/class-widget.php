@@ -47,10 +47,18 @@ final class EJO_Contactads_Widget extends WP_Widget
 
 		$url = get_permalink( $post->ID );
 
-		// $content = apply_filters('the_content', $post->post_content);
-		// $content = str_replace(']]>', ']]&gt;', $content);
-
-		$content = ejo_get_post_summary( $post->ID );
+		// Check if post_excerpt exists, otherwise process post_content
+		if ( !empty($post->post_excerpt) ) {
+			$content = $post->post_excerpt;
+			$content = apply_filters( 'the_excerpt', $content );
+			$content = apply_filters( 'get_the_excerpt', $content );
+		}
+		else {
+			$content = $post->post_content;
+			$content = wp_trim_words( $content );
+			$content = apply_filters( 'the_content', $content );
+			$content = str_replace(']]>', ']]&gt;', $content);
+		}
 
 		$image_id = get_post_thumbnail_id( $post_id );
 		$image_size = apply_filters( 'ejo_contactads_widget_image_size', 'thumbnail' );

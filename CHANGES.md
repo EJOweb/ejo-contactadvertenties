@@ -1,3 +1,6 @@
+- Removed EJO_Base dependancy
+- Fixed flush_rewrite bug
+
 0.4.1
 - Fixed bug due to wrong classname
 - Linked menu_page to own capability

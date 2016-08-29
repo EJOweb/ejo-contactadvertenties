@@ -89,7 +89,7 @@ final class EJO_Contactads_Plugin
     public static function on_plugin_activation()
     {
     	//* Flush rules to process permalinks of custom post type
-    	flush_rewrite_rules();
+    	add_action( 'admin_init', 'flush_rewrite_rules' );
 
     	//* Add contactads capabilities
     	EJO_Contactads::add_caps();	
@@ -99,7 +99,7 @@ final class EJO_Contactads_Plugin
     public static function on_plugin_deactivation()
     {
     	//* Flush rules to process permalinks of custom post type
-    	flush_rewrite_rules();
+    	add_action( 'admin_init', 'flush_rewrite_rules' );
 
     	//* Remove contactads capabilities
     	EJO_Contactads::remove_caps();
